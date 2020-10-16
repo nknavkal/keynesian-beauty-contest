@@ -1,35 +1,39 @@
 pragma solidity >=0.4.22 <0.8.0;
 
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/math/SafeMath.sol';
 
 contract Beauty_contest {
 	using SafeMath for uint;
 
-	mapping (address => uint8) betPicks;
-	mapping (address => uint) betAmounts;
+	mapping (address => int8) betPicks;
+	mapping (address => uint256) betAmounts;
 
 	string question;
 	string choice1;
 	string choice2;
 
-	uint8 pot1;
-	uint8 pot2;
-	uint8 fullPot;
-	uint8 winningPot;
+	uint256 pot1;
+	uint256 pot2;
+	uint256 fullPot;
+	uint256 winningPot;
 
 
-	uint8 endtime; 
-	uint8 winner = -1;
+	uint256 endtime; 
+	int8 winner;
 	
-	constructor(string _question, string _choice1, string _choice2, uint8 _contestDurationInDays) public {
+	constructor(string memory _question, 
+		string memory _choice1, 
+		string memory _choice2, 
+		uint8 _contestDurationInDays) public {
 		question = _question;
 		choice1 = _choice1;
 		choice2 = _choice2;
 		endtime = now + _contestDurationInDays * 1 days;
+		winner = -1;
 	}
 
-	function makeBet(uint8 betPick) payable {
-		require(msg.value < mul(5,1000000000000000000), "No bets over 5 eth please!");
+	function makeBet(int8 betPick) public payable {
+		require(msg.value < SafeMath.mul(5,1000000000000000000), "No bets over 5 eth please!");
 		require(now < endtime, "Too late! Contest has ended");
 		require(betPick == 1 || betPick == 2, "Pick 1 or 2 to make a bet. Call contestInfo to see what each choice is");
 		betAmounts[msg.sender] += msg.value;
@@ -55,14 +59,17 @@ contract Beauty_contest {
 		if(winner == 0) {
 			msg.sender.transfer(betAmounts[msg.sender]); //get back initial bet
 		} else {
-			msg.sender.transfer(div(mul(fullPot, betAmounts[msg.sender]), winningPot));
+			msg.sender.transfer(SafeMath.div(SafeMath.mul(fullPot, betAmounts[msg.sender]), winningPot));
 			//complicated way of writing (betAmount/winningPot) * fullPot without decimals
 		}
 		betPicks[msg.sender] = -1; //can no longer withdraw
 		betAmounts[msg.sender] = 0; //but just in case
 	}
 
-	function contestInfo() public view returns (string key, string _question, string _choice1, string _choice2) {
+	function contestInfo() public view returns (string memory key, 
+		string memory _question, 
+		string memory _choice1, 
+		string memory _choice2) {
 		//view functions do not modify state, but can read it
 		return("The following three strings will indicate the contest question, choice 1, and choice 2 respectively:", 
 			question, choice1, choice2);
