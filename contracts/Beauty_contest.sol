@@ -34,9 +34,10 @@ contract Beauty_contest {
 	}
 
 	function makeBet(uint8 betPick) public payable {
-		require(msg.value < SafeMath.mul(5,1000000000000000000), "No bets over 5 eth please!"); 
+		require(msg.value < SafeMath.mul(2,1000000000000000000), "No bets over 2 eth please!"); 
 		require(now < endtime, "Too late! Contest has ended");
 		require(betPick == 0 || betPick == 1, "Pick 0 or 1 to make a bet. Call contestInfo to see what each choice is");
+		require(betAmounts[msg.sender] == 0, "Only one bet per address. Sorry!");
 		betAmounts[msg.sender] += msg.value;
 		choicePots[betPick] += msg.value;
 		fullPot += msg.value;
