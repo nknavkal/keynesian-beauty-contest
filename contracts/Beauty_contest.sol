@@ -57,7 +57,6 @@ contract Beauty_contest {
 			} else {
 				winner = 2; //tie
 			}
-			winningPot = 
 			emit winnerDeclared(question, choice0, choice1, choices[winner]);
 		}
 		if(winner == 2) {
