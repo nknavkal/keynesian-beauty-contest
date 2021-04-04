@@ -6,20 +6,18 @@ contract Beauty_contest {
 	using SafeMath for uint;
 
 	event winnerDeclared(string question, string choice0, string choice1, int8 winner);
-
 	event betPlaced(address);
-`
+
 	mapping (address => int8) betPicks;
 	mapping (address => uint256) betAmounts;
 
 	string question;
-	string choice0;
-	string choice1;
+	string[2] choices;
 
-	uint256 choicePots[2];
+	uint8[2] choicePots;
+
 	uint256 fullPot;
 	uint256 winningPot;
-
 
 	uint256 endtime; 
 	int8 winner;
@@ -29,8 +27,8 @@ contract Beauty_contest {
 		string memory _choice1, 
 		uint8 _contestDurationInDays) public {
 		question = _question;
-		choice0 = _choice0;
-		choice1 = _choice1;
+		choices[0] = _choice0;
+		choices[1] = _choice1;
 		endtime = now + _contestDurationInDays * 1 days;
 		winner = -1;
 	}
@@ -52,14 +50,15 @@ contract Beauty_contest {
 		if(winner == -1) {
 			if(pot0 > pot1){
 				winner = 0;
-				winningPot = pot0;
+				winningPot = choicePots[winner];
 			} else if (pot0 < pot1) {
 				winner = 1;
-				winningPot = pot1;
+				winningPot = choicePots[winner];
 			} else {
 				winner = 2; //tie
 			}
-			emit winnerDeclared(question, choice0, choice1, winner);
+			winningPot = 
+			emit winnerDeclared(question, choice0, choice1, choices[winner]);
 		}
 		if(winner == 2) {
 			msg.sender.transfer(betAmounts[msg.sender]); //get back initial bet
@@ -73,11 +72,11 @@ contract Beauty_contest {
 
 	function contestInfo() public view returns (string memory key, 
 		string memory _question, 
-		string memory _choice1, 
-		string memory _choice2) {
+		string memory _choice0, 
+		string memory _choice1) {
 		//view functions do not modify state, but can read it
 		return("The following three strings will indicate the contest question, choice 1, and choice 2 respectively:", 
-			question, choice1, choice2);
+			question, choices[0], choice2[1]);
 	}
 
 	fallback() external payable {
